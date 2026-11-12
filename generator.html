@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Password Generator</title>
+
+<style>
+
+/* GLOBAL */
+
+body{
+margin:0;
+background:#0f1117;
+font-family:Segoe UI,Arial;
+color:#e5e7eb;
+display:flex;
+height:100vh;
+}
+
+.num{
+color:#a78bfa;
+font-weight:bold;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+width:240px;
+background:#111318;
+padding:20px;
+border-right:1px solid #1f232b;
+}
+
+.sidebar h4{
+color:#9ca3af;
+font-size:13px;
+margin-top:25px;
+}
+
+.sidebar div{
+padding:8px 0;
+color:#d1d5db;
+font-size:14px;
+cursor:pointer;
+}
+
+.sidebar div:hover{
+color:white;
+}
+
+/* MAIN */
+
+.main{
+flex:1;
+display:flex;
+flex-direction:column;
+}
+
+/* TOP BAR */
+
+.topbar{
+height:60px;
+border-bottom:1px solid #1f232b;
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
+.search{
+background:#1f232b;
+border:none;
+color:white;
+padding:8px 14px;
+border-radius:6px;
+width:280px;
+}
+
+/* CONTENT */
+
+.container{
+width:850px;
+margin:auto;
+margin-top:40px;
+}
+
+/* PASSWORD DISPLAY */
+
+.password-box{
+background:#1a1d25;
+padding:25px;
+border-radius:8px;
+margin-bottom:20px;
+}
+
+.password{
+font-size:28px;
+color:white;
+word-break:break-all;
+letter-spacing:1px;
+}
+
+/* STRENGTH */
+
+.strength-row{
+display:flex;
+align-items:center;
+gap:10px;
+margin-top:10px;
+}
+
+.strength-badge{
+background:#1f2937;
+padding:4px 10px;
+border-radius:6px;
+font-size:13px;
+}
+
+/* BAR */
+
+.bar-container{
+width:180px;
+height:6px;
+background:#1f232b;
+border-radius:6px;
+overflow:hidden;
+}
+
+.bar{
+height:6px;
+width:0%;
+background:#22c55e;
+transition:width .4s;
+}
+
+/* ICON BUTTONS */
+
+.icons{
+margin-top:10px;
+}
+
+.icon{
+width:18px;
+height:18px;
+fill:white;
+}
+
+.icon-btn{
+background:#2a2f3a;
+border:none;
+padding:8px;
+border-radius:6px;
+margin-right:8px;
+cursor:pointer;
+}
+
+.icon-btn:hover{
+background:#3a4050;
+}
+
+/* ROWS */
+
+.row{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:14px 0;
+border-bottom:1px solid #1f232b;
+}
+
+/* SLIDER */
+
+input[type=range]{
+width:420px;
+}
+
+/* SWITCH */
+
+.switch{
+position:relative;
+display:inline-block;
+width:42px;
+height:22px;
+}
+
+.switch input{
+opacity:0;
+}
+
+.slider{
+position:absolute;
+cursor:pointer;
+top:0;
+left:0;
+right:0;
+bottom:0;
+background:#374151;
+border-radius:34px;
+}
+
+.slider:before{
+position:absolute;
+content:"";
+height:16px;
+width:16px;
+left:3px;
+bottom:3px;
+background:white;
+border-radius:50%;
+transition:.3s;
+}
+
+input:checked + .slider{
+background:#6366f1;
+}
+
+input:checked + .slider:before{
+transform:translateX(18px);
+}
+
+/* SAVE SCREEN */
+
+.hidden{display:none}
+
+.save-screen input{
+width:100%;
+padding:10px;
+background:#1f232b;
+border:none;
+border-radius:6px;
+color:white;
+margin-top:10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+
+<div class="sidebar">
+
+
+<h4>Categories</h4>
+
+<div onclick="showAll()">All Items</div>
+<div onclick="showPasswords()">Passwords</div>
+<div onclick="showPasskeys()">Passkeys</div>
+<div onclick="showNotes()">Secure Notes</div>
+<div onclick="showCards()">Credit Cards</div>
+<div onclick="showContacts()">Contact Info</div>
+<div onclick="showDocuments()">Documents</div>
+<div onclick="showShared()">Shared Items</div>
+<div onclick="showTrash()">Trash</div>
+
+<h4>Tools</h4>
+
+<div onclick="showGenerator()">Password Generator</div>
+<div onclick="showEmailMask()">Email Masking</div>
+<div onclick="showHealth()">Password Health</div>
+<div onclick="showBreach()">Data Breach Scanner</div>
+<div onclick="showAutofillDemo()">Autofill Demo</div>
+
+</div>
+
+<!-- MAIN -->
+
+<div class="main">
+
+<div class="topbar">
+
+<input class="search" placeholder="Search">
+
+</div>
+
+<div class="container" id="container">
+
+<div id="generatorScreen">
+
+<h2>Password Generator</h2>
+
+<div class="password-box">
+
+<div id="password" class="password">Press Generate</div>
+
+<div class="strength-row">
+
+<div id="badge" class="strength-badge">Weak</div>
+
+<div class="bar-container">
+<div id="bar" class="bar"></div>
+</div>
+
+</div>
+
+<div class="icons">
+
+<button class="icon-btn" onclick="generate()">
+
+<svg class="icon" viewBox="0 0 24 24">
+<path d="M12 6V3L8 7l4 4V8c2.76 0 5 2.24 5 5a5 5 0 01-5 5 5 5 0 01-4.58-3H5.26A7 7 0 0012 20a7 7 0 000-14z"/>
+</svg>
+
+</button>
+
+<button class="icon-btn" onclick="copyPassword()">
+
+<svg class="icon" viewBox="0 0 24 24">
+<path d="M16 1H4a2 2 0 00-2 2v12h2V3h12V1zM20 5H8a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2z"/>
+</svg>
+
+</button>
+
+<button class="icon-btn" onclick="savePassword()">
+
+<svg class="icon" viewBox="0 0 24 24">
+<path d="M19 11H13V5h-2v6H5v2h6v6h2v-6h6z"/>
+</svg>
+
+</button>
+
+</div>
+
+</div>
+
+<div class="row">
+<div>Type</div>
+
+<div>
+<label><input type="radio" name="mode" value="characters" checked onchange="updateMode();generate()"> Characters</label>
+<label><input type="radio" name="mode" value="words" onchange="updateMode();generate()"> Words</label>
+</div>
+</div>
+
+<div class="row">
+<div>Length</div>
+
+<div>
+
+<input type="range" id="length" min="8" max="64" value="16"
+oninput="updateLen(this.value)">
+
+<span id="lenValue">16</span>
+
+</div>
+
+</div>
+
+<div class="row" id="separatorRow">
+
+<div>Separator</div>
+
+<select id="separator" onchange="updateSeparator()">
+<option value="-">Hyphen (-)</option>
+<option value=",">Comma (,)</option>
+<option value=".">Period (.)</option>
+<option value=" ">Space</option>
+<option value="_">Underscore (_)</option>
+</select>
+
+</div>
+
+<div class="row" id="upperRow">
+<div>Uppercase</div>
+<label class="switch">
+<input type="checkbox" id="upper" checked onchange="generate()">
+<span class="slider"></span>
+</label>
+</div>
+
+<div class="row" id="lowerRow">
+<div>Lowercase</div>
+<label class="switch">
+<input type="checkbox" id="lower" checked onchange="generate()">
+<span class="slider"></span>
+</label>
+</div>
+
+<div class="row" id="numbersRow">
+<div>Numbers</div>
+<label class="switch">
+<input type="checkbox" id="numbers" checked onchange="generate()">
+<span class="slider"></span>
+</label>
+</div>
+
+<div class="row" id="symbolsRow">
+<div>Symbols</div>
+<label class="switch">
+<input type="checkbox" id="symbols" checked onchange="generate()">
+<span class="slider"></span>
+</label>
+</div>
+
+<div class="row" id="ambiguousRow">
+<div>Avoid Ambiguous</div>
+<label class="switch">
+<input type="checkbox" id="ambiguous" onchange="generate()">
+<span class="slider"></span>
+</label>
+</div>
+
+
+<!-- SAVE SCREEN -->
+
+<div id="saveScreen" class="hidden save-screen">
+
+<h2>Save Password</h2>
+
+<input placeholder="Title">
+
+<input placeholder="Email or Username">
+
+<input id="savedPassword">
+
+<br><br>
+
+<button onclick="back()">Cancel</button>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+/* ---------- GENERATE PASSWORD ---------- */
+
+async function generate(){
+
+let mode=document.querySelector('input[name="mode"]:checked').value
+
+let data = {
+
+mode: mode,
+
+length: parseInt(document.getElementById("length").value),
+
+upper: document.getElementById("upper").checked,
+lower: document.getElementById("lower").checked,
+numbers: document.getElementById("numbers").checked,
+symbols: document.getElementById("symbols").checked,
+avoid_ambiguous: document.getElementById("ambiguous").checked,
+
+words: parseInt(document.getElementById("length").value),
+separator: document.getElementById("separator")?.value || "-",
+caps: document.getElementById("upper").checked,
+digits: document.getElementById("numbers").checked
+
+}
+
+const res=await fetch("http://127.0.0.1:5000/generate",{
+
+method:"POST",
+
+headers:{"Content-Type":"application/json"},
+
+body:JSON.stringify(data)
+
+})
+
+const result=await res.json()
+
+displayPassword(result.password)
+
+updateStrength(result)
+
+}
+
+/* ---------- STRENGTH BAR ---------- */
+
+function updateStrength(result){
+
+document.getElementById("badge").innerText=result.strength
+document.getElementById("badge").style.color=result.color
+
+let bar=document.getElementById("bar")
+
+if(result.strength==="Weak") bar.style.width="30%"
+if(result.strength==="Moderate") bar.style.width="60%"
+if(result.strength==="Strong") bar.style.width="100%"
+
+bar.style.background=result.color
+
+}
+
+/* ---------- COPY ---------- */
+
+function copyPassword(){
+
+navigator.clipboard.writeText(
+document.getElementById("password").innerText
+)
+
+alert("Password copied!")
+
+}
+
+/* ---------- SLIDER ---------- */
+
+function updateLen(v){
+
+document.getElementById("lenValue").innerText=v
+generate()
+
+}
+
+/* ---------- SAVE PASSWORD ---------- */
+
+async function savePassword(){
+
+let site=prompt("Website (example: google.com)")
+let user=prompt("Username")
+
+let pass=document.getElementById("password").innerText
+
+await fetch("http://127.0.0.1:5000/save",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+site:site,
+username:user,
+password:pass
+})
+
+})
+
+alert("Password saved!")
+
+loadVault()
+
+}
+
+/* ---------- LOAD VAULT ---------- */
+
+async function loadVault(){
+
+const res = await fetch("http://127.0.0.1:5000/vault")
+const data = await res.json()
+
+let table = "<h2>Saved Passwords</h2>"
+
+table += "<table style='width:100%;border-collapse:collapse'>"
+table += "<tr><th>Website</th><th>Username</th><th>Password</th><th>Actions</th></tr>"
+
+data.forEach(entry=>{
+
+let masked = "••••••••"
+
+table += `
+<tr>
+<td>${entry.site}</td>
+<td>${entry.username}</td>
+<td>${masked}</td>
+<td>
+<button onclick="autofill('${entry.username}','${entry.password}')">Autofill</button>
+<button onclick="copyVaultPassword('${entry.password}')">Copy</button>
+</td>
+</tr>
+`
+
+})
+
+table += "</table>"
+
+document.getElementById("container").innerHTML = table
+
+}
+
+/* ---------- AUTOFILL DEMO ---------- */
+
+function autofill(user,pass){
+
+alert("Autofill Demo:\nUsername: "+user+"\nPassword: "+pass)
+
+}
+
+/* ---------- SIDEBAR NAV ---------- */
+
+
+
+function showPasswords(){
+
+loadVault()
+
+}
+
+function showCreditCards(){
+
+document.getElementById("container").innerHTML=
+"<h2>Credit Card Storage (Bonus)</h2><p>Feature placeholder.</p>"
+
+}
+
+function showNotes(){
+
+document.getElementById("container").innerHTML=
+"<h2>Secure Notes</h2><p>Feature placeholder.</p>"
+
+}
+
+/* ---------- SIDEBAR SCREENS ---------- */
+
+function showGenerator(){
+
+location.reload()
+
+}
+
+
+
+
+
+/* ---------- PLACEHOLDER PAGES ---------- */
+
+function showAll(){
+
+document.getElementById("container").innerHTML =
+"<h2>All Items</h2><p>This would show every stored vault item.</p>"
+
+}
+
+function showPasskeys(){
+
+document.getElementById("container").innerHTML =
+"<h2>Passkeys</h2><p>Passkey management feature.</p>"
+
+}
+
+function showNotes(){
+
+document.getElementById("container").innerHTML =
+"<h2>Secure Notes</h2><textarea style='width:100%;height:200px'></textarea>"
+
+}
+
+function showCards(){
+
+document.getElementById("container").innerHTML = `
+<h2>Credit Cards</h2>
+
+<input id="cardName" placeholder="Cardholder Name"><br><br>
+
+<input id="cardNumber" placeholder="Card Number (16 digits)"><br><br>
+
+<input id="cardExp" placeholder="Expiration MM/YY"><br><br>
+
+<input id="cardCVC" placeholder="CVC"><br><br>
+
+<button onclick="saveCard()">Save Card</button>
+
+<h3>Saved Cards</h3>
+
+<div id="cardList"></div>
+`
+
+loadCards()
+
+}
+
+/* Luhn algorithm */
+
+function validateCard(){
+
+let number = prompt("Enter card number")
+
+number = number.replace(/\s/g,'')
+
+let sum=0
+let toggle=false
+
+for(let i=number.length-1;i>=0;i--){
+
+let digit=parseInt(number[i])
+
+if(toggle){
+digit*=2
+if(digit>9) digit-=9
+}
+
+sum+=digit
+toggle=!toggle
+
+}
+
+if(sum%10===0)
+alert("Valid card number")
+else
+alert("Invalid card number")
+
+}
+
+function showContacts(){
+
+document.getElementById("container").innerHTML =
+"<h2>Contact Info</h2><p>Store secure contact details.</p>"
+
+}
+
+function showDocuments(){
+
+document.getElementById("container").innerHTML =
+"<h2>Documents</h2><p>Secure document storage.</p>"
+
+}
+
+function showShared(){
+
+document.getElementById("container").innerHTML =
+"<h2>Shared Items</h2><p>Items shared with other users.</p>"
+
+}
+
+function showTrash(){
+
+document.getElementById("container").innerHTML =
+"<h2>Trash</h2><p>Deleted vault items.</p>"
+
+}
+
+/* ---------- TOOLS ---------- */
+
+function showEmailMask(){
+
+document.getElementById("container").innerHTML =
+"<h2>Email Masking</h2><p>Create disposable email aliases.</p>"
+
+}
+
+function showHealth(){
+
+document.getElementById("container").innerHTML =
+"<h2>Password Health</h2><p>Check reused or weak passwords.</p>"
+
+}
+
+function showBreach(){
+
+document.getElementById("container").innerHTML =
+"<h2>Data Breach Scanner</h2><input placeholder='Enter email'><button>Scan</button>"
+
+}
+
+function updateMode(){
+
+let mode = document.querySelector('input[name="mode"]:checked').value
+
+let slider = document.getElementById("length")
+let label = document.getElementById("lenValue")
+
+if(mode === "words"){
+
+/* switch slider to word count */
+
+slider.min = 3
+slider.max = 10
+
+if(slider.value > 10) slider.value = 4
+
+label.innerText = slider.value
+
+}else{
+
+/* switch slider back to password length */
+
+slider.min = 8
+slider.max = 64
+
+if(slider.value < 8) slider.value = 16
+
+label.innerText = slider.value
+
+}
+
+let sepRow = document.getElementById("separatorRow")
+
+if(mode === "words"){
+    sepRow.style.display = "flex"
+}else{
+    sepRow.style.display = "none"
+}
+
+let lowerRow = document.getElementById("lowerRow")
+let symbolsRow = document.getElementById("symbolsRow")
+let ambiguousRow = document.getElementById("ambiguousRow")
+
+if(mode === "words"){
+    lowerRow.style.display = "none"
+    symbolsRow.style.display = "none"
+    ambiguousRow.style.display = "none"
+}else{
+    lowerRow.style.display = "flex"
+    symbolsRow.style.display = "flex"
+    ambiguousRow.style.display = "flex"
+}
+
+/* regenerate automatically */
+
+generate()
+
+}
+
+function displayPassword(password){
+
+let html = ""
+
+for (let i = 0; i < password.length; i++) {
+
+let char = password[i]
+
+if (char >= "0" && char <= "9") {
+
+html += `<span class="num">${char}</span>`
+
+} else {
+
+html += `<span>${char}</span>`
+
+}
+
+}
+
+document.getElementById("password").innerHTML = html
+
+}
+
+function updateSeparator(){
+
+let sep=document.getElementById("separator").value
+
+let current=document.getElementById("password").innerText
+
+let words=current.split(/[-_,. ]/)
+
+document.getElementById("password").innerText=words.join(sep)
+
+}
+
+async function saveCard(){
+
+let name=document.getElementById("cardName").value
+let number=document.getElementById("cardNumber").value
+let exp=document.getElementById("cardExp").value
+let cvc=document.getElementById("cardCVC").value
+
+const res=await fetch("http://127.0.0.1:5000/save_card",{
+
+method:"POST",
+
+headers:{"Content-Type":"application/json"},
+
+body:JSON.stringify({
+name:name,
+number:number,
+exp:exp,
+cvc:cvc
+})
+
+})
+
+const result=await res.json()
+
+if(result.error){
+alert(result.error)
+}else{
+alert("Card saved")
+loadCards()
+}
+
+}
+
+async function loadCards(){
+
+    const res = await fetch("http://127.0.0.1:5000/cards")
+    const data = await res.json()
+
+    let html=""
+
+    data.forEach((card,index)=>{
+
+        let masked="**** **** **** "+card.number.slice(-4)
+
+        html+=`
+        <div style="background:#1a1d25;padding:10px;margin:10px 0;border-radius:6px">
+
+        <b>${card.brand}</b><br>
+
+        <span id="card-${index}">${masked}</span><br>
+
+        Exp: ${card.exp}<br><br>
+
+        <button onclick="toggleCard(${index},'${card.number}')">
+        Show
+        </button>
+
+        </div>
+        `
+
+    })
+
+    document.getElementById("cardList").innerHTML=html
+
+}
+
+
+function showAutofillDemo(){
+
+    document.getElementById("container").innerHTML = `
+    <h2>Autofill Demo</h2>
+
+    <input id="demoUser" placeholder="Username"><br><br>
+
+    <input id="demoPass" type="password" placeholder="Password"><br><br>
+
+    <h3>Saved Credentials</h3>
+
+    <div id="credList"></div>
+    `
+
+    loadCredentials()
+
+}
+
+
+async function loadCredentials(){
+
+    const res = await fetch("http://127.0.0.1:5000/vault")
+    const data = await res.json()
+
+    let html = ""
+
+    data.forEach(entry=>{
+
+        html += `
+        <div style="background:#1a1d25;padding:10px;margin:8px;border-radius:6px">
+        <b>${entry.site}</b><br>
+        ${entry.username}<br>
+        <button onclick="autofill('${entry.username}','${entry.password}')">
+        Autofill
+        </button>
+        </div>
+        `
+
+    })
+
+    document.getElementById("credList").innerHTML = html
+
+}
+
+
+function autofill(user, pass){
+
+    document.getElementById("demoUser").value = user
+    document.getElementById("demoPass").value = pass
+
+    alert("Credentials autofilled!")
+
+}
+
+function copyVaultPassword(pass){
+
+navigator.clipboard.writeText(pass)
+
+alert("Password copied!")
+
+}
+
+function toggleCard(index, number){
+
+    let element = document.getElementById("card-"+index)
+
+    if(element.innerText.includes("*")){
+
+        element.innerText = number
+
+    }else{
+
+        element.innerText = "**** **** **** "+number.slice(-4)
+
+    }
+
+}
+
+/* ---------- START ---------- */
+
+generate()
+
+</script>
+
+</body>
+</html>
