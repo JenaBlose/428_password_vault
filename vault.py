@@ -6,13 +6,13 @@ DATA_FILE = "vault.json"
 
 
 def load_key():
-
     try:
-        return open(KEY_FILE,"rb").read()
-
-    except:
+        with open(KEY_FILE, "rb") as key_file:
+            return key_file.read()
+    except FileNotFoundError:
         key = Fernet.generate_key()
-        open(KEY_FILE,"wb").write(key)
+        with open(KEY_FILE, "wb") as key_file:
+            key_file.write(key)
         return key
 
 
@@ -20,53 +20,51 @@ key = load_key()
 cipher = Fernet(key)
 
 
-def save_entry(site, username, password):
-
+def load_data():
     try:
-        data = json.load(open(DATA_FILE))
-    except:
-        data = []
+        with open(DATA_FILE, "r", encoding="utf-8") as data_file:
+            return json.load(data_file)
+    except FileNotFoundError:
+        return []
+
+
+def save_data(data):
+    with open(DATA_FILE, "w", encoding="utf-8") as data_file:
+        json.dump(data, data_file, indent=2)
+
+
+def save_entry(site, username, password):
+    data = load_data()
 
     encrypted = cipher.encrypt(password.encode()).decode()
-
+    
     data.append({
-    "type": "password",
-    "site": site,
-    "username": username,
-    "password": encrypted
+        "type": "password",
+        "site": site,
+        "username": username,
+        "password": encrypted
     })
-
-    json.dump(data, open(DATA_FILE,"w"), indent=2)
+    
+    save_data(data)
 
 
 def get_entries():
-
-    try:
-        data = json.load(open(DATA_FILE))
-    except:
-        return []
-
+    data = load_data()
     entries = []
 
     for entry in data:
-
-        # only process password entries
         if entry.get("type") == "password":
-
             entry["password"] = cipher.decrypt(
                 entry["password"].encode()
             ).decode()
-
+        
             entries.append(entry)
-
+    
     return entries
 
-def save_card(name, number, exp, cvc, card_type):
 
-    try:
-        data = json.load(open(DATA_FILE))
-    except:
-        data = []
+def save_card(name, number, exp, cvc, card_type):
+    data = load_data()
 
     enc_number = cipher.encrypt(number.encode()).decode()
     enc_cvc = cipher.encrypt(cvc.encode()).decode()
@@ -80,24 +78,23 @@ def save_card(name, number, exp, cvc, card_type):
         "cvc": enc_cvc
     })
 
-    json.dump(data, open(DATA_FILE, "w"), indent=2)
+    save_data(data)
 
 
 def get_cards():
-
-    try:
-        data = json.load(open(DATA_FILE))
-    except:
-        return []
-
+    data = load_data()
     cards = []
 
     for entry in data:
         if entry.get("type") == "card":
-
-            entry["number"] = cipher.decrypt(entry["number"].encode()).decode()
-            entry["cvc"] = cipher.decrypt(entry["cvc"].encode()).decode()
-
+            entry["number"] = cipher.decrypt(
+                entry["number"].encode()
+            ).decode()
+            
+            entry["cvc"] = cipher.decrypt(
+                entry["cvc"].encode()
+            ).decode()
+            
             cards.append(entry)
 
     return cards
